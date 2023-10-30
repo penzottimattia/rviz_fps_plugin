@@ -66,6 +66,18 @@ FPSMotionViewController::FPSMotionViewController(): nh_("")
   position_property_ = new VectorProperty( "Position", Ogre::Vector3( 5, 5, 10 ), "Position of the camera.", this );
 
   camera_placement_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("camera_placement", 1);
+  sight_pub_ = nh_.advertise<visualization_msgs::Marker>("sight", 1);
+
+  sight_marker_ = visualization_msgs::Marker();
+  sight_marker_.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+  sight_marker_.action = visualization_msgs::Marker::MODIFY;
+  sight_marker_.id = 0;
+  sight_marker_.scale.z = 0.02;
+  sight_marker_.color.a = 1.0;
+  sight_marker_.color.g = 1.0;
+  sight_marker_.pose.orientation.w = 1.0;
+  sight_marker_.text = '+';
+  sight_marker_.lifetime = ros::Duration(3.0);
 
 }
 
@@ -246,6 +258,21 @@ void FPSMotionViewController::publishCameraPose()
   pose.pose.orientation.w = orientation.w;
   camera_placement_pub_.publish(pose);
 } 
+
+void FPSMotionViewController::publishSight()
+{
+  sight_marker_.header.frame_id = context_->getFixedFrame().toStdString();
+  Ogre::Vector3 position = position_property_->getVector();
+  Ogre::Quaternion orientation = getOrientation();
+  Ogre::Vector3 direction = orientation * Ogre::Vector3::NEGATIVE_UNIT_Z;
+  Ogre::Vector3 sight = position + direction * 0.5;
+  sight_marker_.pose.position.x = sight.x;
+  sight_marker_.pose.position.y = sight.y;
+  sight_marker_.pose.position.z = sight.z;
+  sight_marker_.pose.orientation.x = orientation.x;
+  sight_marker_.header.stamp = ros::Time::now();
+  sight_pub_.publish(sight_marker_);
+}
 
 }// end namespace rviz
 

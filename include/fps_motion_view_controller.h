@@ -34,6 +34,7 @@
 #include <OgreQuaternion.h>
 
 #include <ros/ros.h>
+#include <visualization_msgs/Marker.h>
 #include "rviz/frame_position_tracking_view_controller.h"
 
 using namespace rviz;
@@ -80,11 +81,15 @@ public:
   void setCamera( Ogre::Camera* source_camera ) { setPropertiesFromCamera(source_camera );};
 
   void publishCameraPose();
+  void publishSight();
 
 protected:
 
   ros::NodeHandle nh_;
   ros::Publisher camera_placement_pub_;
+  ros::Publisher sight_pub_;
+
+  visualization_msgs::Marker sight_marker_;
   
   virtual void onTargetFrameChanged(const Ogre::Vector3& old_reference_position, const Ogre::Quaternion& old_reference_orientation);
 

@@ -224,6 +224,9 @@ int FPSMotionTool::processKeyEvent(QKeyEvent *event, rviz::RenderPanel* panel)
     {
       ((rviz::FPSMotionViewController*) panel->getViewController())->publishCameraPose();
     }
+
+    ((rviz::FPSMotionViewController*) panel->getViewController())->publishSight();
+
   }
 
   return Render;
@@ -236,6 +239,7 @@ int FPSMotionTool::processMouseEvent(rviz::ViewportMouseEvent& event)
     event.panel->getViewController()->handleMouseEvent(event);
     setCursor( event.panel->getViewController()->getCursor() );
   }
+  ((rviz::FPSMotionViewController*) event.panel->getViewController())->publishSight();
   return 0;
 }
 
