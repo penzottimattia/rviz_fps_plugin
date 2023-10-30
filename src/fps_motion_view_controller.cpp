@@ -43,6 +43,7 @@
 #include <rviz/properties/vector_property.h>
 #include <rviz/properties/bool_property.h>
 
+#include <geometry_msgs/PoseStamped.h>
 #include <fps_motion_view_controller.h>
 
 namespace rviz
@@ -55,7 +56,7 @@ static const Ogre::Quaternion ROBOT_TO_CAMERA_ROTATION =
 static const float PITCH_LIMIT_LOW = -Ogre::Math::HALF_PI + 0.001;
 static const float PITCH_LIMIT_HIGH = Ogre::Math::HALF_PI - 0.001;
 
-FPSMotionViewController::FPSMotionViewController()
+FPSMotionViewController::FPSMotionViewController(): nh_("")
 {
   yaw_property_ = new FloatProperty( "Yaw", 0, "Rotation of the camera around the Z (up) axis.", this );
   pitch_property_ = new FloatProperty( "Pitch", 0, "How much the camera is tipped downward.", this);
@@ -63,6 +64,8 @@ FPSMotionViewController::FPSMotionViewController()
   pitch_property_->setMin( -pitch_property_->getMax() );
 
   position_property_ = new VectorProperty( "Position", Ogre::Vector3( 5, 5, 10 ), "Position of the camera.", this );
+
+  camera_placement_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("camera_placement", 1);
 
 }
 
@@ -228,7 +231,23 @@ void FPSMotionViewController::fly( float x, float y, float z )
   position_property_->add( update );
 }
 
-} // end namespace rviz
+void FPSMotionViewController::publishCameraPose()
+{
+  geometry_msgs::PoseStamped pose;
+  pose.header.frame_id = context_->getFixedFrame().toStdString();
+  pose.header.stamp = ros::Time::now();
+  pose.pose.position.x = position_property_->getVector().x;
+  pose.pose.position.y = position_property_->getVector().y;
+  pose.pose.position.z = position_property_->getVector().z;
+  Ogre::Quaternion orientation = getOrientation();
+  pose.pose.orientation.x = orientation.x;
+  pose.pose.orientation.y = orientation.y;
+  pose.pose.orientation.z = orientation.z;
+  pose.pose.orientation.w = orientation.w;
+  camera_placement_pub_.publish(pose);
+} 
+
+}// end namespace rviz
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(rviz::FPSMotionViewController, rviz::ViewController)

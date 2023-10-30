@@ -218,6 +218,12 @@ int FPSMotionTool::processKeyEvent(QKeyEvent *event, rviz::RenderPanel* panel)
       context_->getToolManager()->setCurrentTool(m_fallback_tool);
       context_->getViewManager()->setCurrentViewControllerType(m_fallback_view_controller);
     }
+
+    // publish camera pos on space bar key
+    if (event->key() == Qt::Key_Space)
+    {
+      ((rviz::FPSMotionViewController*) panel->getViewController())->publishCameraPose();
+    }
   }
 
   return Render;
